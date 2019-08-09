@@ -35,7 +35,7 @@
             android:id="@+id/txt_widget_exchange"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Coinone"
+            android:text="Upbit"
             android:textColor="@android:color/white"
             android:textSize="12sp"/>
 

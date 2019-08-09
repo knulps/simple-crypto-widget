@@ -9,7 +9,9 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import jake.data.model.GetTickerResponse;
+import java.util.List;
+
+import jake.data.model.GetUpbitTickerResponse;
 import jake.data.remote.APIServiceInterface;
 import jake.data.remote.ApiUtils;
 import retrofit2.Call;
@@ -65,15 +67,15 @@ public class SimpleWidgetProvider extends AppWidgetProvider {
     public void updateAppWidget(final Context context, final AppWidgetManager appWidgetManager, final int appWidgetId) {
         Log.e(TAG, "updateAppWidget, appWidgetId : " + appWidgetId);
         if (service == null) service = ApiUtils.getAPIService();
-        service.getTicker("luna", "json").enqueue(new Callback<GetTickerResponse>() {
+        service.getTicker("BTC-LUNA,KRW-BTC").enqueue(new Callback<List<GetUpbitTickerResponse>>() {
             @Override
-            public void onResponse(Call<GetTickerResponse> call, Response<GetTickerResponse> response) {
-                GetTickerResponse getTickerResponse = response.body();
+            public void onResponse(Call<List<GetUpbitTickerResponse>> call, Response<List<GetUpbitTickerResponse>> response) {
+                List<GetUpbitTickerResponse> getTickerResponse = response.body();
 
                 boolean updateFail = false;
                 try {
-                    if (getTickerResponse != null && getTickerResponse.getResult() != null && getTickerResponse.getResult().equals("success")) {
-                        Log.e(TAG, "update price : " + getTickerResponse.getLast());
+                    if (getTickerResponse != null && getTickerResponse.size() > 0) {
+                        Log.e(TAG, "update price");
                         updateWidgetView(context, appWidgetManager, appWidgetId, getTickerResponse);
                     } else {
                         updateFail = true;
@@ -84,12 +86,14 @@ public class SimpleWidgetProvider extends AppWidgetProvider {
                 }
 
                 if (updateFail) {
+                    Log.e(TAG, "update Failed");
                     updateWidgetView(context, appWidgetManager, appWidgetId, null);
                 }
             }
 
             @Override
-            public void onFailure(Call<GetTickerResponse> call, Throwable t) {
+            public void onFailure(Call<List<GetUpbitTickerResponse>> call, Throwable t) {
+                Log.e(TAG, "get Request onFailure, msg : " + t.getMessage());
                 updateWidgetView(context, appWidgetManager, appWidgetId, null);
             }
         });
@@ -98,17 +102,28 @@ public class SimpleWidgetProvider extends AppWidgetProvider {
     /**
      * update Widget UI
      */
-    private void updateWidgetView(final Context context, final AppWidgetManager appWidgetManager, final int appWidgetId, GetTickerResponse getTickerResponse) {
+    private void updateWidgetView(final Context context, final AppWidgetManager appWidgetManager, final int appWidgetId, List<GetUpbitTickerResponse> getTickerResponse) {
         Log.e(TAG, "updateView, id : " + appWidgetId);
         RemoteViews updateViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-        updateViews.setTextViewText(R.id.txt_widget_exchange, "Coinone");
+        updateViews.setTextViewText(R.id.txt_widget_exchange, "Upbit");
         if (getTickerResponse == null) {
             updateViews.setTextViewText(R.id.txt_widget_date, DateFormat.format("HH:mm:ss", System.currentTimeMillis()));
             updateViews.setTextViewText(R.id.txt_widget_price, "-");
         } else {
-            updateViews.setTextViewText(R.id.txt_widget_date, DateFormat.format("HH:mm:ss", Long.parseLong(getTickerResponse.getTimestamp()) * 1000));
-            updateViews.setTextViewText(R.id.txt_widget_price, Utility.setMoneyFormat(getTickerResponse.getLast()));
-            updateViews.setTextViewText(R.id.txt_widget_ticker, String.format("%1$S | KRW", getTickerResponse.getCurrency().toUpperCase()));
+            try {
+                GetUpbitTickerResponse btcLunaObject = getTickerResponse.get(0);
+                GetUpbitTickerResponse krwBtcObject = getTickerResponse.get(1);
+                double lunaBTCPrice = btcLunaObject.getTradePrice();
+                long lunaKRWPrice = (long) (btcLunaObject.getTradePrice() * krwBtcObject.getTradePrice());
+                Log.e(TAG, lunaBTCPrice +", " +lunaKRWPrice +", " + btcLunaObject.getTimestamp());
+                updateViews.setTextViewText(R.id.txt_widget_date, DateFormat.format("HH:mm:ss", btcLunaObject.getTimestamp()));
+                updateViews.setTextViewText(R.id.txt_widget_price, String.valueOf(lunaKRWPrice));
+                updateViews.setTextViewText(R.id.txt_widget_ticker, String.format("%1$S | KRW", "LUNA"));
+            } catch(Exception e) {
+                e.printStackTrace();
+                updateViews.setTextViewText(R.id.txt_widget_date, DateFormat.format("HH:mm:ss", System.currentTimeMillis()));
+                updateViews.setTextViewText(R.id.txt_widget_price, "-");
+            }
         }
         updateViews.setOnClickPendingIntent(R.id.layout_widget_body, getPendingSelfIntent(context, TOUCH_ACTION, appWidgetId));
         appWidgetManager.updateAppWidget(appWidgetId, updateViews);

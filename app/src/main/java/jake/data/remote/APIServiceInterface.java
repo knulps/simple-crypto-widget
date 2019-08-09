@@ -1,6 +1,8 @@
 package jake.data.remote;
 
-import jake.data.model.GetTickerResponse;
+import java.util.List;
+
+import jake.data.model.GetUpbitTickerResponse;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
@@ -11,5 +13,5 @@ import retrofit2.http.Query;
 public interface APIServiceInterface {
 
     @GET("ticker")
-    Call<GetTickerResponse> getTicker(@Query("currency") String currency, @Query("format") String format);
+    Call<List<GetUpbitTickerResponse>> getTicker(@Query("markets") String markets);
 }

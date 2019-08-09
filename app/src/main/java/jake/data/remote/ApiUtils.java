@@ -7,7 +7,7 @@ import okhttp3.RequestBody;
  * API Utility for Retrofit2
  */
 public class ApiUtils {
-    private static final String BASE_URL = "https://api.coinone.co.kr/";
+    private static final String BASE_URL = "http://api.upbit.com/v1/";
 
     public static APIServiceInterface getAPIService() {
         return jake.data.remote.RetrofitClient.getClient(BASE_URL).create(APIServiceInterface.class);

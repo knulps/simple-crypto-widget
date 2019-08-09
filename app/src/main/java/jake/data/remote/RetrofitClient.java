@@ -10,12 +10,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * Singleton for Retrofit Client
  */
-public class RetrofitClient {
+class RetrofitClient {
     private static Retrofit retrofit = null;
 
     private static final String TAG = "RetrofitClient";
 
-    public static Retrofit getClient(String baseUrl) {
+    static Retrofit getClient(String baseUrl) {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
             @Override
             public void log(String message) {

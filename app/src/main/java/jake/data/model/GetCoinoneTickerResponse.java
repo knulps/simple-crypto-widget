@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName;
  * Version Response
  * Created by Jake on 2019-06-26
  */
-public class GetTickerResponse {
+public class GetCoinoneTickerResponse {
     @SerializedName("currency")
     @Expose
     private String currency;
