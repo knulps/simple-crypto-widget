@@ -67,7 +67,7 @@ public class SimpleWidgetProvider extends AppWidgetProvider {
     public void updateAppWidget(final Context context, final AppWidgetManager appWidgetManager, final int appWidgetId) {
         Log.e(TAG, "updateAppWidget, appWidgetId : " + appWidgetId);
         if (service == null) service = ApiUtils.getAPIService();
-        service.getTicker("BTC-LUNA,KRW-BTC").enqueue(new Callback<List<GetUpbitTickerResponse>>() {
+        service.getTicker("BTC-LUNA,KRW-BTC" ).enqueue(new Callback<List<GetUpbitTickerResponse>>() {
             @Override
             public void onResponse(Call<List<GetUpbitTickerResponse>> call, Response<List<GetUpbitTickerResponse>> response) {
                 List<GetUpbitTickerResponse> getTickerResponse = response.body();
@@ -75,7 +75,7 @@ public class SimpleWidgetProvider extends AppWidgetProvider {
                 boolean updateFail = false;
                 try {
                     if (getTickerResponse != null && getTickerResponse.size() > 0) {
-                        Log.e(TAG, "update price");
+                        Log.e(TAG, "update price" );
                         updateWidgetView(context, appWidgetManager, appWidgetId, getTickerResponse);
                     } else {
                         updateFail = true;
@@ -86,7 +86,7 @@ public class SimpleWidgetProvider extends AppWidgetProvider {
                 }
 
                 if (updateFail) {
-                    Log.e(TAG, "update Failed");
+                    Log.e(TAG, "update Failed" );
                     updateWidgetView(context, appWidgetManager, appWidgetId, null);
                 }
             }
@@ -105,24 +105,24 @@ public class SimpleWidgetProvider extends AppWidgetProvider {
     private void updateWidgetView(final Context context, final AppWidgetManager appWidgetManager, final int appWidgetId, List<GetUpbitTickerResponse> getTickerResponse) {
         Log.e(TAG, "updateView, id : " + appWidgetId);
         RemoteViews updateViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-        updateViews.setTextViewText(R.id.txt_widget_exchange, "Upbit");
+        updateViews.setTextViewText(R.id.txt_widget_exchange, "Upbit" );
         if (getTickerResponse == null) {
             updateViews.setTextViewText(R.id.txt_widget_date, DateFormat.format("HH:mm:ss", System.currentTimeMillis()));
-            updateViews.setTextViewText(R.id.txt_widget_price, "-");
+            updateViews.setTextViewText(R.id.txt_widget_price, "-" );
         } else {
             try {
                 GetUpbitTickerResponse btcLunaObject = getTickerResponse.get(0);
                 GetUpbitTickerResponse krwBtcObject = getTickerResponse.get(1);
                 double lunaBTCPrice = btcLunaObject.getTradePrice();
                 long lunaKRWPrice = (long) (btcLunaObject.getTradePrice() * krwBtcObject.getTradePrice());
-                Log.e(TAG, lunaBTCPrice +", " +lunaKRWPrice +", " + btcLunaObject.getTimestamp());
+                Log.e(TAG, lunaBTCPrice + ", " + lunaKRWPrice + ", " + btcLunaObject.getTimestamp());
                 updateViews.setTextViewText(R.id.txt_widget_date, DateFormat.format("HH:mm:ss", btcLunaObject.getTimestamp()));
-                updateViews.setTextViewText(R.id.txt_widget_price, String.valueOf(lunaKRWPrice));
-                updateViews.setTextViewText(R.id.txt_widget_ticker, String.format("%1$S | KRW", "LUNA"));
-            } catch(Exception e) {
+                updateViews.setTextViewText(R.id.txt_widget_price, String.format("%1$s\n%2$s", String.valueOf(lunaKRWPrice), String.format("%.7f", lunaBTCPrice)));
+                updateViews.setTextViewText(R.id.txt_widget_ticker, "LUNA" );
+            } catch (Exception e) {
                 e.printStackTrace();
                 updateViews.setTextViewText(R.id.txt_widget_date, DateFormat.format("HH:mm:ss", System.currentTimeMillis()));
-                updateViews.setTextViewText(R.id.txt_widget_price, "-");
+                updateViews.setTextViewText(R.id.txt_widget_price, "-" );
             }
         }
         updateViews.setOnClickPendingIntent(R.id.layout_widget_body, getPendingSelfIntent(context, TOUCH_ACTION, appWidgetId));
@@ -133,7 +133,7 @@ public class SimpleWidgetProvider extends AppWidgetProvider {
      * Get Pending Self Intent
      */
     public PendingIntent getPendingSelfIntent(Context context, String action, int appWidgetId) {
-        Log.e(TAG, "getPendingSelfIntent");
+        Log.e(TAG, "getPendingSelfIntent" );
         Intent intent = new Intent(context, SimpleWidgetProvider.class);
         intent.setAction(action);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
